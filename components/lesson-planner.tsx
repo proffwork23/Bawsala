@@ -43,10 +43,12 @@ export function LessonPlannerClient() {
   const [studentsCount, setStudentsCount] = useState("20");
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
-  const [view, setView] = useState<"form" | "dashboard">("form");
+  const [view, setView] = useState<"form" | "loading" | "dashboard">("form");
   const [elapsedTime, setElapsedTime] = useState(0);
   
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isImageDone, setIsImageDone] = useState(false);
   const [isAlternativesOpen, setIsAlternativesOpen] = useState(false);
 
   const { object, submit, isLoading, stop } = useObject({
@@ -54,32 +56,58 @@ export function LessonPlannerClient() {
     schema: lessonSchema,
   });
 
+  // Elapsed Time Counter
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isLoading) {
+    if (view === "loading") {
       interval = setInterval(() => setElapsedTime((prev) => prev + 1), 1000);
     } else {
       setElapsedTime(0);
     }
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [view]);
 
-  // Fetch cover image once the keyword is available
+  // Preload Image during streaming
   useEffect(() => {
-    if (object?.imageGenerationPrompt && !coverImageUrl) {
-      // Use Pollinations AI to generate the image on the fly
+    if (object?.imageGenerationPrompt && !coverImageUrl && !isImageLoading && !isImageDone) {
+      setIsImageLoading(true);
       const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(object.imageGenerationPrompt)}?width=1280&height=720&nologo=true`;
-      setCoverImageUrl(url);
+      
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        setCoverImageUrl(url);
+        setIsImageLoading(false);
+        setIsImageDone(true);
+      };
+      img.onerror = () => {
+        // Fallback image in case Pollinations fails
+        setCoverImageUrl("https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+        setIsImageLoading(false);
+        setIsImageDone(true);
+      };
     }
-  }, [object?.imageGenerationPrompt, coverImageUrl]);
+  }, [object?.imageGenerationPrompt, coverImageUrl, isImageLoading, isImageDone]);
+
+  // Transition to dashboard when everything is fully loaded
+  useEffect(() => {
+    if (view === "loading" && !isLoading) {
+      // If LLM finished, check if image is also done OR it never started (e.g. error in prompt)
+      if (isImageDone || (!object?.imageGenerationPrompt && !isImageLoading)) {
+        setView("dashboard");
+      }
+    }
+  }, [view, isLoading, isImageDone, isImageLoading, object?.imageGenerationPrompt]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject || !topic || !studentsCount) return;
 
-    setView("dashboard");
+    setView("loading");
     setCoverImageUrl(null);
     setIsAlternativesOpen(false);
+    setIsImageLoading(false);
+    setIsImageDone(false);
 
     submit({
       subject,
@@ -94,6 +122,57 @@ export function LessonPlannerClient() {
     if (isLoading) stop();
     setView("form");
   };
+
+  if (view === "loading") {
+    let loadingMessage = "جاري إعداد وتحليل معطيات الدرس...";
+    if (object?.imageGenerationPrompt && isImageLoading) loadingMessage = "جاري توليد صورة مخصصة بالذكاء الاصطناعي...";
+    else if (object?.interactiveSteps) loadingMessage = "جاري كتابة السيناريو التفصيلي للأنشطة...";
+    else if (object?.mermaidDiagramCode) loadingMessage = "جاري رسم وتصميم الخريطة الذهنية...";
+    else if (object?.classroomManagement) loadingMessage = "جاري توزيع وإدارة الفصل...";
+    else if (object?.lessonHook) loadingMessage = "جاري صياغة تمهيد جذاب...";
+    
+    return (
+      <div className="mx-auto w-full max-w-lg px-4 py-20 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500" dir="rtl">
+        <div className="relative flex items-center justify-center mt-10">
+          <div className="absolute inset-0 bg-machine-azure/20 rounded-full blur-xl animate-pulse" />
+          <Loader2 className="w-24 h-24 text-machine-cobalt dark:text-machine-ink animate-spin relative z-10" />
+          <div className="absolute font-mono font-bold text-machine-cobalt dark:text-machine-ink text-lg z-20">
+            {elapsedTime}ث
+          </div>
+        </div>
+        
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl font-bold text-soul-fg dark:text-white">يرجى الانتظار</h2>
+          <p className="text-soul-fg/80 dark:text-white/80 font-medium animate-pulse">
+            {loadingMessage}
+          </p>
+        </div>
+
+        {/* Progress steps indication */}
+        <div className="w-full space-y-4 bg-black/5 dark:bg-white/5 p-6 rounded-3xl border border-black/10 dark:border-white/10 mt-8">
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${object?.lessonHook ? 'text-soul-fg dark:text-white font-semibold' : 'text-soul-fg/50 dark:text-white/50'}`}>المحتوى النصي للدرس</span>
+            {object?.lessonHook ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Loader2 className="w-4 h-4 animate-spin text-soul-fg/30 dark:text-white/30" />}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${object?.mermaidDiagramCode ? 'text-soul-fg dark:text-white font-semibold' : 'text-soul-fg/50 dark:text-white/50'}`}>الخريطة الذهنية</span>
+            {object?.mermaidDiagramCode ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Loader2 className="w-4 h-4 animate-spin text-soul-fg/30 dark:text-white/30" />}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${isImageDone ? 'text-soul-fg dark:text-white font-semibold' : 'text-soul-fg/50 dark:text-white/50'}`}>الصورة المخصصة</span>
+            {isImageDone ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Loader2 className="w-4 h-4 animate-spin text-soul-fg/30 dark:text-white/30" />}
+          </div>
+        </div>
+        
+        <button
+          onClick={handleBack}
+          className="text-xs text-red-500/80 hover:text-red-500 underline underline-offset-4 mt-8 transition-colors"
+        >
+          إلغاء التوليد والعودة
+        </button>
+      </div>
+    );
+  }
 
   if (view === "dashboard") {
     return (
@@ -119,35 +198,25 @@ export function LessonPlannerClient() {
             className="flex items-center gap-2 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-soul-fg dark:text-white px-5 py-2.5 rounded-xl transition-all text-sm font-bold shadow-sm cursor-pointer"
           >
             <ArrowRight className="w-4 h-4 ml-1" />
-            الرجوع للتعديل
+            توليد درس جديد
           </button>
         </section>
 
-        {/* Loading Indicator */}
-        {isLoading && (
-          <div className="flex items-center gap-3 p-4 bg-machine-azure/10 text-machine-cobalt dark:text-machine-ink rounded-xl border border-machine-azure/20 animate-pulse">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="font-semibold text-sm">جاري التفكير وصياغة الخطة... (الوقت المنقضي: {elapsedTime}ث)</span>
-          </div>
-        )}
-
         {/* Hero Image */}
-        {(coverImageUrl || isLoading) && (
-          <section className="relative w-full h-64 sm:h-80 rounded-3xl overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center border border-black/10 dark:border-white/10 shadow-sm">
-            {coverImageUrl ? (
-              <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover animate-in fade-in duration-700" />
-            ) : (
-              <div className="flex flex-col items-center text-soul-fg/40 dark:text-white/40">
-                <ImageIcon className="w-10 h-10 mb-2 animate-pulse" />
-                <span className="text-sm">جاري البحث عن صورة تناسب الدرس...</span>
-              </div>
-            )}
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-              <h2 className="text-white text-2xl font-bold drop-shadow-md">الخطة التطبيقية للدرس</h2>
+        <section className="relative w-full h-64 sm:h-80 rounded-3xl overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center border border-black/10 dark:border-white/10 shadow-sm">
+          {coverImageUrl ? (
+            <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover animate-in fade-in duration-700" />
+          ) : (
+            <div className="flex flex-col items-center text-soul-fg/40 dark:text-white/40">
+              <ImageIcon className="w-10 h-10 mb-2" />
+              <span className="text-sm">تعذر تحميل الصورة.</span>
             </div>
-          </section>
-        )}
+          )}
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+            <h2 className="text-white text-2xl font-bold drop-shadow-md">الخطة التطبيقية للدرس</h2>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Overview Cards */}
@@ -156,7 +225,7 @@ export function LessonPlannerClient() {
               <Sparkles className="w-5 h-5 text-amber-500" /> تمهيد الدرس
             </h3>
             <p className="text-sm text-soul-fg/80 dark:text-white/80 leading-relaxed min-h-[60px]">
-              {object?.lessonHook || (isLoading ? <span className="animate-pulse">جاري الكتابة...</span> : "لم يتم توليد تمهيد.")}
+              {object?.lessonHook || "لم يتم توليد تمهيد مناسب."}
             </p>
           </section>
 
@@ -165,7 +234,7 @@ export function LessonPlannerClient() {
               <Users className="w-5 h-5 text-machine-azure" /> إدارة الفصل والتوزيع
             </h3>
             <p className="text-sm text-soul-fg/80 dark:text-white/80 leading-relaxed min-h-[60px]">
-              {object?.classroomManagement || (isLoading ? <span className="animate-pulse">جاري الكتابة...</span> : "لم يتم توليد خطة توزيع.")}
+              {object?.classroomManagement || "لم يتم توليد خطة توزيع مناسبة."}
             </p>
           </section>
         </div>
@@ -176,13 +245,13 @@ export function LessonPlannerClient() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-indigo-500">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
-            التدفق البصري للدرس
+            الخريطة الذهنية للدرس
           </h3>
           {object?.mermaidDiagramCode ? (
             <MermaidDiagram chart={object.mermaidDiagramCode} />
           ) : (
              <div className="h-40 flex items-center justify-center text-sm text-soul-fg/40 dark:text-white/40">
-               {isLoading ? "جاري رسم المخطط البياني..." : "لم يتم توليد المخطط."}
+               لم يتم توليد المخطط بنجاح.
              </div>
           )}
         </section>
@@ -205,16 +274,16 @@ export function LessonPlannerClient() {
                   </div>
                 </div>
                 <div className="space-y-1.5 pt-1">
-                  <h4 className="font-bold text-soul-fg dark:text-white text-base">{step?.title || "..."}</h4>
+                  <h4 className="font-bold text-soul-fg dark:text-white text-base">{step?.title || "خطوة بدون عنوان"}</h4>
                   <p className="text-sm text-soul-fg/80 dark:text-white/80 leading-relaxed">
-                    {step?.description || "..."}
+                    {step?.description || "لا يوجد وصف."}
                   </p>
                 </div>
               </div>
             ))}
             {(!object?.interactiveSteps || object.interactiveSteps.length === 0) && (
               <div className="text-center py-6 text-sm text-soul-fg/50 dark:text-white/50">
-                {isLoading ? "جاري كتابة الخطوات..." : "لا توجد خطوات."}
+                لا توجد خطوات تنفيذية مقترحة.
               </div>
             )}
           </div>
@@ -419,16 +488,9 @@ export function LessonPlannerClient() {
           <div className="sm:col-span-2 pt-4">
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-machine-cobalt hover:bg-machine-azure text-white font-bold rounded-xl px-6 py-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-machine-azure/20 cursor-pointer"
+              className="w-full bg-machine-cobalt hover:bg-machine-azure text-white font-bold rounded-xl px-6 py-4 transition-all flex items-center justify-center gap-2 shadow-lg shadow-machine-azure/20 cursor-pointer"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> جاري التوليد...
-                </>
-              ) : (
-                "توليد خطة الدرس"
-              )}
+              توليد خطة الدرس
             </button>
           </div>
         </form>
