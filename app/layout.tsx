@@ -24,11 +24,6 @@ const amiri = Amiri({
 export const metadata: Metadata = {
   title: "بوصلة",
   description: "منصة بوصلة التعليمية لبناء خطط الدرس الذكية بالاعتماد على أفضل استراتيجيات التدريس الحديثة.",
-  icons: {
-    icon: "/favicon.ico?v=3",
-    shortcut: "/favicon.ico?v=3",
-    apple: "/favicon.ico?v=3",
-  },
 };
 
 export default async function RootLayout({
