@@ -98,11 +98,26 @@ ${contextText}
 
     const groq = createGroq({
       apiKey: process.env.GROQ_API_KEY || ["gsk_", "nDAoa", "aHBnkNS", "khFLyeLGWGdy", "b3FY0ekZDiB", "0zWSbdvHYyiv", "yrfiv"].join(""),
+      fetch: async (url, options) => {
+        if (options?.body) {
+          try {
+            const body = JSON.parse(options.body as string);
+            if (body.response_format?.type === "json_schema") {
+              body.response_format = { type: "json_object" };
+              if (body.messages && body.messages.length > 0) {
+                body.messages[0].content += "\n\nYou MUST return only valid JSON.";
+              }
+              options.body = JSON.stringify(body);
+            }
+          } catch (e) {}
+        }
+        return fetch(url, options);
+      }
     });
 
     // 4. Generate the lesson plan via streamObject
     const result = streamObject({
-      model: groq('llama3-70b-8192'),
+      model: groq('llama-3.3-70b-versatile'),
       system: SYSTEM_PROMPT,
       schema: lessonSchema,
       prompt: `المادة: ${subject}\nموضوع الدرس: ${topic}\nالمرحلة الدراسية: ${stage}\nعدد الطلاب: ${studentsCount}\nالموارد المتاحة: ${resources.join(", ") || "لا توجد موارد خاصة"}\n\nرجاءً قم بكتابة خطة الدرس التطبيقية استناداً إلى الشروط والسياق.`,
