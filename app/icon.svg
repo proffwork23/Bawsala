@@ -1,0 +1,45 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+    @keyframes pulse-core {
+      0%, 100% { transform: scale(1); opacity: 0.15; }
+      50% { transform: scale(1.25); opacity: 0.25; }
+    }
+    @keyframes pulse-inner {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+    @keyframes scale-up {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .compass { transform-origin: 50px 50px; }
+    .ring { animation: pulse-ring 1s ease-out forwards; transform-origin: 50px 50px; opacity: 0; }
+    .core { animation: pulse-core 3s ease-in-out infinite; transform-origin: 50px 50px; opacity: 0.15; }
+    .inner { animation: pulse-inner 3s ease-in-out infinite; transform-origin: 50px 50px; opacity: 0.9; }
+    .star { animation: scale-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: 50px 50px; }
+  </style>
+
+  <circle class="ring compass" cx="50" cy="50" r="22" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 4" fill="none" />
+
+  <g class="star compass">
+    <!-- North Pointer -->
+    <polygon points="50,20 44,50 50,50" fill="#38bdf8" />
+    <polygon points="50,20 56,50 50,50" fill="#0ea5e9" />
+    <!-- South Pointer -->
+    <polygon points="50,80 44,50 50,50" fill="#38bdf8" opacity="0.85" />
+    <polygon points="50,80 56,50 50,50" fill="#0ea5e9" opacity="0.85" />
+    <!-- West Pointer -->
+    <polygon points="20,50 50,44 50,50" fill="#38bdf8" opacity="0.9" />
+    <polygon points="20,50 50,56 50,50" fill="#0ea5e9" opacity="0.9" />
+    <!-- East Pointer -->
+    <polygon points="80,50 50,44 50,50" fill="#38bdf8" opacity="0.9" />
+    <polygon points="80,50 50,56 50,50" fill="#0ea5e9" opacity="0.9" />
+  </g>
+
+  <circle class="core compass" cx="50" cy="50" r="7" fill="#fbbf24" />
+  <circle class="inner compass" cx="50" cy="50" r="3" fill="#fbbf24" />
+</svg>
