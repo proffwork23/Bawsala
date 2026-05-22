@@ -103,9 +103,10 @@ ${contextText}
           try {
             const body = JSON.parse(options.body as string);
             if (body.response_format?.type === "json_schema") {
+              const schema = body.response_format.json_schema?.schema;
               body.response_format = { type: "json_object" };
-              if (body.messages && body.messages.length > 0) {
-                body.messages[0].content += "\n\nYou MUST return only valid JSON.";
+              if (body.messages && body.messages.length > 0 && schema) {
+                body.messages[0].content += "\n\nYou MUST return only valid JSON matching this schema:\n" + JSON.stringify(schema, null, 2);
               }
               options.body = JSON.stringify(body);
             }
