@@ -15,8 +15,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function generateEmbeddings(texts: string[]) {
   const { embeddings } = await embedMany({
-    model: google.textEmbeddingModel("text-embedding-004"),
+    model: google.embedding("gemini-embedding-001"),
     values: texts,
+    maxRetries: 5,
+    providerOptions: {
+      google: {
+        outputDimensionality: 768,
+      },
+    },
   });
   return embeddings;
 }
@@ -86,6 +92,9 @@ async function ingestFile(filePath: string, type: "طريقة" | "استراتي
         } else {
         console.log(`Batch ${i / batchSize + 1} inserted successfully.`);
         }
+
+        // Wait 2.5 seconds to avoid hitting Google AI Studio rate limits
+        await new Promise((resolve) => setTimeout(resolve, 2500));
     } catch (err) {
         console.error("Failed to generate embeddings or insert:", err);
     }

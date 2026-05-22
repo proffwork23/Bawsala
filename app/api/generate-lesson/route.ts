@@ -18,8 +18,13 @@ export async function POST(req: Request) {
     const queryText = `المادة: ${subject} | الموضوع: ${topic} | المرحلة: ${stage} | الطلاب: ${studentsCount}`;
     
     const { embedding: queryEmbedding } = await embed({
-      model: google.textEmbeddingModel("text-embedding-004"),
+      model: google.embedding("gemini-embedding-001"),
       value: queryText,
+      providerOptions: {
+        google: {
+          outputDimensionality: 768,
+        },
+      },
     });
 
     // 2. Query Supabase for top 3 matching strategies
