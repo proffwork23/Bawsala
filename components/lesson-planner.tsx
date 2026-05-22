@@ -7,6 +7,7 @@ import {
   Loader2, BookOpen, Users, GraduationCap, FileText, Sparkles, 
   Wrench, ArrowRight, CheckCircle2, Clock 
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 // List of available classroom resources
 const AVAILABLE_RESOURCES = [
@@ -204,6 +205,7 @@ export function LessonPlannerClient() {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [view, setView] = useState<"form" | "dashboard">("form");
   const [activeTab, setActiveTab] = useState<"hook" | "seating" | "scenario" | "alternatives">("hook");
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const { messages, sendMessage, status, stop } = useChat({
     transport: new DefaultChatTransport({
@@ -212,6 +214,21 @@ export function LessonPlannerClient() {
   });
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      setElapsedTime(0);
+      interval = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -304,7 +321,7 @@ export function LessonPlannerClient() {
         <section className="glass-panel rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2 text-right">
             <div className="flex items-center gap-2 text-machine-cobalt dark:text-machine-ink text-sm font-semibold">
-              <Sparkles className="w-4 h-4 animate-pulse" />
+              <Logo className="w-5 h-5" />
               <span>لوحة تحكم خطة الدرس الذكية - بوصلة</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-soul-fg dark:text-white">
@@ -409,11 +426,21 @@ export function LessonPlannerClient() {
                     <MarkdownRenderer text={currentSection.content} />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-machine-azure" />
-                    <p className="text-sm text-soul-fg/60 dark:text-white/60">
-                      في انتظار صياغة هذا القسم بواسطة النظام...
-                    </p>
+                  <div className="flex flex-col items-center justify-center py-20 space-y-6">
+                    <div className="relative flex items-center justify-center">
+                      <Loader2 className="w-16 h-16 animate-spin text-machine-azure" />
+                      <span className="absolute text-sm font-mono font-bold text-machine-cobalt dark:text-machine-ink">
+                        {elapsedTime}s
+                      </span>
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-base font-bold text-soul-fg dark:text-white">
+                        جاري توليد خطة الدرس الذكية...
+                      </p>
+                      <p className="text-sm text-soul-fg/60 dark:text-white/60">
+                        الوقت المنقضي: <span className="font-mono font-bold text-machine-cobalt dark:text-machine-ink">{elapsedTime}</span> ثانية (يستغرق عادةً 30 ثانية)
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -421,7 +448,10 @@ export function LessonPlannerClient() {
               {/* Progress Bar Footer for Dashboard */}
               {isLoading && (
                 <div className="mt-8 pt-4 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-xs text-soul-fg/50 dark:text-white/50">
-                  <span>بوصلة تفاعلية - يتم التوليد الآن بواسطة النظام</span>
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-machine-azure shrink-0" />
+                    جاري التوليد الآن بواسطة النظام... (الوقت المنقضي: {elapsedTime} ثانية)
+                  </span>
                   <div className="flex items-center gap-1 animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-machine-azure" />
                     <span className="w-1.5 h-1.5 rounded-full bg-machine-azure delay-75" />
@@ -440,8 +470,8 @@ export function LessonPlannerClient() {
     <div className="mx-auto w-full max-w-4xl px-4 py-8 space-y-8" dir="rtl">
       <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-heading font-extrabold flex items-center justify-center gap-2">
-            <Sparkles className="w-8 h-8 text-machine-azure" />
+          <h1 className="text-3xl font-heading font-extrabold flex items-center justify-center gap-3">
+            <Logo className="w-12 h-12" />
             بوصلة
           </h1>
           <p className="text-soul-fg/80 dark:text-white/80 text-sm sm:text-base">

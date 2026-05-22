@@ -22,7 +22,7 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  title: "بوصلة - مخطط الدروس الذكي",
+  title: "بوصلة",
   description: "منصة بوصلة التعليمية لبناء خطط الدرس الذكية بالاعتماد على أفضل استراتيجيات التدريس الحديثة.",
   icons: {
     icon: "/favicon.ico",
