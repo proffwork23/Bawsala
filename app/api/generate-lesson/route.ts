@@ -1,9 +1,24 @@
-import { streamText, embed } from "ai";
+import { streamObject, embed } from "ai";
 import { google } from "@ai-sdk/google";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 export const maxDuration = 60; // Set higher timeout for LLM
+
+// Strict JSON Schema for the LLM output
+const lessonSchema = z.object({
+  coverImageKeyword: z.string().describe("A single English keyword to fetch an image from Unsplash (e.g., 'Solar System')"),
+  lessonHook: z.string().describe("A short, engaging opening to grab students' attention"),
+  classroomManagement: z.string().describe("Specific instructions on how to group students based on the provided 'studentsCount'"),
+  mermaidDiagramCode: z.string().describe("Valid Mermaid.js graph code (e.g., graph TD;) showing the flow of the lesson or group rotation"),
+  interactiveSteps: z.array(z.object({
+    title: z.string().describe("Step title"),
+    description: z.string().describe("Detailed explanation of what the teacher and students will do"),
+    durationInMinutes: z.number().describe("Duration in minutes"),
+  })),
+  alternativeStrategies: z.array(z.string()).describe("Brief list of fallback strategies"),
+});
 
 export async function POST(req: Request) {
   try {
@@ -58,37 +73,26 @@ export async function POST(req: Request) {
 القيود والشروط الهامة:
 1. لا تقم بتأليف استراتيجيات غير موجودة في السياق المرفق.
 2. التزم بتخصيص الخطة لتناسب المرحلة الدراسية وعدد الطلاب المذكور بدقة.
-3. التزم بتصميم وتخطيط جميع الأنشطة والخطوات بالاعتماد فقط وحصرياً على الموارد المتاحة المحددة في الفصل وهي: (${resources.join(", ") || "لا توجد موارد خاصة"}). لا تفترض وجود أي أجهزة، أدوات، أوراق عمل، أو تقنيات أخرى غير مذكورة في هذه القائمة.
-4. يجب كتابة خطة الدرس وتقسيمها باستخدام هذه العناوين الفرعية الأربعة بالضبط، ولا تكتب أي نص أو مقدمات أو خاتمة خارج هذه الأقسام الأربعة:
-   ### تمهيد الدرس (Hook)
-   اكتب هنا طريقة جاذبة ومبتكرة لبدء الدرس باستخدام الموارد المتاحة.
-   
-   ### التوزيع الميكانيكي للطلاب
-   اكتب هنا كيفية تقسيم وجلوس الطلاب (مجموعات، ثنائيات، إلخ) بناءً على عددهم والمساحة والموارد المحددة.
-   
-   ### السيناريو التطبيقي خطوة بخطوة
-   اكتب هنا خطوات تنفيذ الدرس بالتفصيل بناءً على "الخطوات الإجرائية" للاستراتيجية الأنسب من السياق، مع الدمج الدقيق للموارد المتاحة في الخطوات.
-   
-   ### الاستراتيجيات البديلة
-   اكتب هنا الاستراتيجيات الأخرى (المسترجعة أيضاً) كخيارات بديلة باختصار شديد ومتى يمكن للمعلم استخدامها.
-
-- اكتب بلغة عربية فصحى وبأسلوب تربوي رصين ومنظم ومقسم بعناوين واضحة.
-- استخدم تنسيق Markdown (عناوين، نقاط، خط عريض) ليظهر بشكل جميل على المنصة.
+3. التزم بتصميم وتخطيط جميع الأنشطة والخطوات بالاعتماد فقط وحصرياً على الموارد المتاحة المحددة في الفصل.
+4. يجب توليد مخطط Mermaid.js صحيح برمجياً ويدعم النصوص العربية أو الانجليزية داخل العقد (Nodes) لعرض تدفق الدرس.
+5. استخرج كلمة مفتاحية واحدة باللغة الإنجليزية للبحث عن صورة غلاف معبرة عن الموضوع.
 
 سياق الاستراتيجيات المسترجعة:
 ${contextText}
 `;
 
-    // 4. Generate the lesson plan via stream
-    const result = streamText({
+    // 4. Generate the lesson plan via streamObject
+    const result = streamObject({
       model: google("gemini-2.5-flash"),
       system: systemPrompt,
-      prompt: `المادة: ${subject}\nموضوع الدرس: ${topic}\nالمرحلة الدراسية: ${stage}\nعدد الطلاب: ${studentsCount}\nالموارد المتاحة: ${resources.join(", ") || "لا توجد موارد خاصة"}\n\nرجاءً قم بكتابة خطة الدرس التطبيقية بناءً على التعليمات والسياق.`,
+      schema: lessonSchema,
+      prompt: `المادة: ${subject}\nموضوع الدرس: ${topic}\nالمرحلة الدراسية: ${stage}\nعدد الطلاب: ${studentsCount}\nالموارد المتاحة: ${resources.join(", ") || "لا توجد موارد خاصة"}\n\nرجاءً قم بكتابة خطة الدرس التطبيقية استناداً إلى الشروط والسياق.`,
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toTextStreamResponse();
   } catch (e: any) {
     console.error("Error generating lesson plan:", e);
     return NextResponse.json({ error: e.message || "Something went wrong" }, { status: 500 });
   }
 }
+
