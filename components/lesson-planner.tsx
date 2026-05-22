@@ -22,10 +22,10 @@ const AVAILABLE_RESOURCES = [
 ];
 
 const TABS = [
-  { id: "hook", label: "تمهيد الدرس", emoji: "🎯" },
-  { id: "seating", label: "التوزيع الميكانيكي", emoji: "👥" },
-  { id: "scenario", label: "السيناريو التطبيقي", emoji: "📋" },
-  { id: "alternatives", label: "الاستراتيجيات البديلة", emoji: "🔄" }
+  { id: "hook", label: "تمهيد الدرس", emoji: "" },
+  { id: "seating", label: "التوزيع الميكانيكي", emoji: "" },
+  { id: "scenario", label: "السيناريو التطبيقي", emoji: "" },
+  { id: "alternatives", label: "الاستراتيجيات البديلة", emoji: "" }
 ];
 
 interface Section {
@@ -149,18 +149,18 @@ function MarkdownRenderer({ text }: { text: string }) {
 // Helper to extract sections from streamed text
 function parseStreamedContent(text: string): Section[] {
   const sections = [
-    { id: "hook", title: "تمهيد الدرس (Hook)", emoji: "🎯", content: "" },
-    { id: "seating", title: "التوزيع الميكانيكي للطلاب", emoji: "👥", content: "" },
-    { id: "scenario", title: "السيناريو التطبيقي خطوة بخطوة", emoji: "📋", content: "" },
-    { id: "alternatives", title: "الاستراتيجيات البديلة", emoji: "🔄", content: "" }
+    { id: "hook", title: "تمهيد الدرس (Hook)", emoji: "", content: "" },
+    { id: "seating", title: "التوزيع الميكانيكي للطلاب", emoji: "", content: "" },
+    { id: "scenario", title: "السيناريو التطبيقي خطوة بخطوة", emoji: "", content: "" },
+    { id: "alternatives", title: "الاستراتيجيات البديلة", emoji: "", content: "" }
   ];
 
   if (!text) return sections;
 
-  const hookIndex = text.indexOf("### 🎯");
-  const seatingIndex = text.indexOf("### 👥");
-  const scenarioIndex = text.indexOf("### 📋");
-  const alternativesIndex = text.indexOf("### 🔄");
+  const hookIndex = text.indexOf("### تمهيد الدرس");
+  const seatingIndex = text.indexOf("### التوزيع الميكانيكي");
+  const scenarioIndex = text.indexOf("### السيناريو التطبيقي");
+  const alternativesIndex = text.indexOf("### الاستراتيجيات البديلة");
 
   const getSlice = (start: number, end: number) => {
     if (start === -1) return "";
@@ -412,7 +412,7 @@ export function LessonPlannerClient() {
                   <div className="flex flex-col items-center justify-center py-20 space-y-4">
                     <Loader2 className="w-8 h-8 animate-spin text-machine-azure" />
                     <p className="text-sm text-soul-fg/60 dark:text-white/60">
-                      في انتظار صياغة هذا القسم بواسطة الذكاء الاصطناعي...
+                      في انتظار صياغة هذا القسم بواسطة النظام...
                     </p>
                   </div>
                 )}
@@ -421,7 +421,7 @@ export function LessonPlannerClient() {
               {/* Progress Bar Footer for Dashboard */}
               {isLoading && (
                 <div className="mt-8 pt-4 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-xs text-soul-fg/50 dark:text-white/50">
-                  <span>بوصلة تفاعلية - يتم التوليد الآن بالذكاء الاصطناعي</span>
+                  <span>بوصلة تفاعلية - يتم التوليد الآن بواسطة النظام</span>
                   <div className="flex items-center gap-1 animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-machine-azure" />
                     <span className="w-1.5 h-1.5 rounded-full bg-machine-azure delay-75" />
@@ -445,7 +445,7 @@ export function LessonPlannerClient() {
             بوصلة المعلم
           </h1>
           <p className="text-soul-fg/80 dark:text-white/80 text-sm sm:text-base">
-            أدخل معطيات درسك وسيقوم الذكاء الاصطناعي ببناء خطة تفصيلية بالاعتماد على أفضل استراتيجيات التدريس.
+            أدخل معطيات درسك وسيقوم النظام ببناء خطة تفصيلية بالاعتماد على أفضل استراتيجيات التدريس.
           </p>
         </div>
 
