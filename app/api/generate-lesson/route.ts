@@ -1,4 +1,5 @@
 import { streamObject, embed } from "ai";
+import { createGroq } from '@ai-sdk/groq';
 import { google } from "@ai-sdk/google";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
@@ -95,9 +96,13 @@ export async function POST(req: Request) {
 ${contextText}
 `;
 
+    const groq = createGroq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
     // 4. Generate the lesson plan via streamObject
     const result = streamObject({
-      model: google("gemini-2.5-flash"),
+      model: groq('llama3-70b-8192'),
       system: SYSTEM_PROMPT,
       schema: lessonSchema,
       prompt: `المادة: ${subject}\nموضوع الدرس: ${topic}\nالمرحلة الدراسية: ${stage}\nعدد الطلاب: ${studentsCount}\nالموارد المتاحة: ${resources.join(", ") || "لا توجد موارد خاصة"}\n\nرجاءً قم بكتابة خطة الدرس التطبيقية استناداً إلى الشروط والسياق.`,
