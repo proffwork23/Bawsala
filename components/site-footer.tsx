@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-6xl px-4 pb-10 sm:px-6 lg:px-8">
         <div className="glass-panel rounded-3xl px-5 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-soul-fg/75 dark:text-white/75">
+            <p className="text-center text-sm leading-loose text-soul-fg/60 dark:text-white/60 sm:text-right">
               منصة بوصلة — جميع الحقوق محفوظة &copy; {new Date().getFullYear()}
             </p>
 

@@ -8,6 +8,7 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
 const links = [
   { href: "/", label: "الرئيسية" },
+  { href: "/planner", label: "مخطط الدروس" },
 ] as const;
 
 export function SiteNav() {

@@ -442,7 +442,7 @@ export function LessonPlannerClient() {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-heading font-extrabold flex items-center justify-center gap-2">
             <Sparkles className="w-8 h-8 text-machine-azure" />
-            بوصلة المعلم
+            بوصلة
           </h1>
           <p className="text-soul-fg/80 dark:text-white/80 text-sm sm:text-base">
             أدخل معطيات درسك وسيقوم النظام ببناء خطة تفصيلية بالاعتماد على أفضل استراتيجيات التدريس.
