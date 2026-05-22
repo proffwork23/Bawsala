@@ -1,0 +1,219 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* PRD Theme Tokens */
+  --color-machine-bg: var(--machine-bg);
+  --color-machine-fg: var(--machine-fg);
+  --color-machine-ink: var(--machine-ink);
+  --color-machine-azure: var(--machine-azure);
+  --color-machine-cobalt: var(--machine-cobalt);
+
+  --color-soul-bg: var(--soul-bg);
+  --color-soul-fg: var(--soul-fg);
+  --color-soul-espresso: var(--soul-espresso);
+
+  --color-glow-adab: var(--glow-adab);
+  --color-glow-tech: var(--glow-tech);
+  --color-glow-ilm: var(--glow-ilm);
+  --color-glow-art: var(--glow-art);
+
+  /* Shadows and Blurs */
+  --shadow-glass: 0 1px 0 rgba(255,255,255,0.06) inset, 0 0 0 1px rgba(148,163,184,0.12) inset, 0 20px 60px rgba(0,0,0,0.45);
+  --blur-glass: 18px;
+}
+
+:root {
+  /* Typography */
+  --radius: 0.75rem;
+
+  /* PRD Theme: SOUL (Light / parchment reading) */
+  --soul-bg: #fdfbf7;
+  --soul-fg: #2c1e16;
+  --soul-espresso: #2c1e16;
+
+  /* shadcn/tailwind base tokens (mapped from Soul by default) */
+  --background: var(--soul-bg);
+  --foreground: var(--soul-fg);
+  --card: rgba(255, 255, 255, 0.7);
+  --card-foreground: var(--soul-fg);
+  --popover: rgba(255, 255, 255, 0.9);
+  --popover-foreground: var(--soul-fg);
+  --primary: #2563eb;
+  --primary-foreground: #f8fafc;
+  --secondary: rgba(15, 23, 42, 0.06);
+  --secondary-foreground: var(--soul-fg);
+  --muted: rgba(15, 23, 42, 0.06);
+  --muted-foreground: rgba(44, 30, 22, 0.72);
+  --accent: rgba(15, 23, 42, 0.08);
+  --accent-foreground: var(--soul-fg);
+  --destructive: #dc2626;
+  --border: rgba(15, 23, 42, 0.12);
+  --input: rgba(15, 23, 42, 0.12);
+  --ring: rgba(37, 99, 235, 0.45);
+
+  /* PRD Theme: MACHINE (Dark / glass) - declared here for reuse */
+  --machine-bg: #0f172a;
+  --machine-fg: #f8fafc;
+  --machine-ink: #38bdf8;
+  --machine-azure: #38bdf8;
+  --machine-cobalt: #2563eb;
+
+  /* Category glows (hover) */
+  --glow-adab: #f59e0b;
+  --glow-tech: #06b6d4;
+  --glow-ilm: #10b981;
+  --glow-art: #9ca3af;
+}
+
+.dark {
+  /* PRD Theme: MACHINE (Dark / glassmorphism) */
+  --background: var(--machine-bg);
+  --foreground: var(--machine-fg);
+  --card: rgba(248, 250, 252, 0.06);
+  --card-foreground: var(--machine-fg);
+  --popover: rgba(15, 23, 42, 0.72);
+  --popover-foreground: var(--machine-fg);
+  --primary: var(--machine-cobalt);
+  --primary-foreground: var(--machine-fg);
+  --secondary: rgba(248, 250, 252, 0.06);
+  --secondary-foreground: var(--machine-fg);
+  --muted: rgba(248, 250, 252, 0.06);
+  --muted-foreground: rgba(248, 250, 252, 0.72);
+  --accent: rgba(56, 189, 248, 0.12);
+  --accent-foreground: var(--machine-fg);
+  --destructive: #ef4444;
+  --border: rgba(148, 163, 184, 0.18);
+  --input: rgba(148, 163, 184, 0.22);
+  --ring: rgba(56, 189, 248, 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-black/5 border border-black/10 backdrop-blur-[18px] dark:bg-white/5 dark:border-white/10;
+  }
+  
+  :is(.dark .glass-panel) {
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 0 0 1px rgba(148, 163, 184, 0.12) inset, 0 20px 60px rgba(0, 0, 0, 0.45);
+  }
+  
+  :is(:not(.dark) .glass-panel) {
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05) inset,
+      0 0 0 1px rgba(0, 0, 0, 0.05) inset, 0 10px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Workstation Textures */
+  .texture-paper {
+    background-color: #fdf6e3;
+    background-image: radial-gradient(#dcd5c0 1px, transparent 0);
+    background-size: 24px 24px;
+    position: relative;
+    color: #433422;
+  }
+
+  .texture-paper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("https://www.transparenttextures.com/patterns/felt.png");
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .texture-grid {
+    background-color: #020617;
+    background-image: 
+      linear-gradient(to right, rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .texture-blueprint {
+    background-color: #f8fafc;
+    background-image: 
+      linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Manuscript Effects */
+  @keyframes inkBleed {
+    0% { opacity: 0; filter: blur(5px); transform: scale(0.98); }
+    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+  }
+
+  .ink-bleed {
+    animation: inkBleed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .torn-edge-mask {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='5'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    mask-size: cover;
+  }
+
+  .papyrus-texture {
+    background-color: #e4d5b7;
+    background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png");
+    box-shadow: 
+      inset 0 0 100px rgba(0,0,0,0.05),
+      2px 2px 10px rgba(0,0,0,0.1);
+  }
+}
