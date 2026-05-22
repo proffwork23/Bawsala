@@ -12,7 +12,7 @@ import { MermaidDiagram } from "@/components/mermaid-diagram";
 
 // Same schema as the backend
 const lessonSchema = z.object({
-  coverImageKeyword: z.string(),
+  imageGenerationPrompt: z.string(),
   lessonHook: z.string(),
   classroomManagement: z.string(),
   mermaidDiagramCode: z.string(),
@@ -66,15 +66,12 @@ export function LessonPlannerClient() {
 
   // Fetch cover image once the keyword is available
   useEffect(() => {
-    if (object?.coverImageKeyword && !coverImageUrl) {
-      fetch(`/api/pexels?keyword=${encodeURIComponent(object.coverImageKeyword)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.url) setCoverImageUrl(data.url);
-        })
-        .catch(console.error);
+    if (object?.imageGenerationPrompt && !coverImageUrl) {
+      // Use Pollinations AI to generate the image on the fly
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(object.imageGenerationPrompt)}?width=1280&height=720&nologo=true`;
+      setCoverImageUrl(url);
     }
-  }, [object?.coverImageKeyword, coverImageUrl]);
+  }, [object?.imageGenerationPrompt, coverImageUrl]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

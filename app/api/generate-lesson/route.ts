@@ -4,14 +4,14 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-export const maxDuration = 60; // Set higher timeout for LLM
+export const maxDuration = 60;
 
 // Strict JSON Schema for the LLM output
 const lessonSchema = z.object({
-  coverImageKeyword: z.string().describe("A single English keyword to fetch an image from Unsplash (e.g., 'Solar System')"),
+  imageGenerationPrompt: z.string().describe("A highly detailed English prompt to generate an educational AI image explaining the topic (e.g., 'A highly detailed 3D illustration of the solar system showing planets orbiting the sun, educational, vivid colors')"),
   lessonHook: z.string().describe("A short, engaging opening to grab students' attention"),
   classroomManagement: z.string().describe("Specific instructions on how to group students based on the provided 'studentsCount'"),
-  mermaidDiagramCode: z.string().describe("Valid Mermaid.js graph code (e.g., graph TD;) showing the flow of the lesson or group rotation"),
+  mermaidDiagramCode: z.string().describe("Valid Mermaid.js 'mindmap' code (starting with mindmap\\n) showing the core concepts and elements of the topic"),
   interactiveSteps: z.array(z.object({
     title: z.string().describe("Step title"),
     description: z.string().describe("Detailed explanation of what the teacher and students will do"),
@@ -68,14 +68,14 @@ export async function POST(req: Request) {
 `).join("\n---\n");
 
     // 3. System Prompt setup (Zero-Shot RAG)
-    const systemPrompt = `أنت "بوصلة"، خبير تصميم تعليمي محترف، مهمتك كتابة خطة درس تطبيقية للمعلم بناءً على المدخلات المقدمة واستراتيجيات التدريس المسترجعة من قاعدة البيانات فقط (Zero-Shot RAG).
+    const systemPrompt = `أنت "بوصلة"، خبير تصميم تعليمي محترف، مهمتك كتابة خطة درس تطبيقية للمعلم بناءً على المدخلات المقدمة واستراتيجيات التدريس المسترجعة من قاعدة البيانات فقط.
 
 القيود والشروط الهامة:
 1. لا تقم بتأليف استراتيجيات غير موجودة في السياق المرفق.
 2. التزم بتخصيص الخطة لتناسب المرحلة الدراسية وعدد الطلاب المذكور بدقة.
-3. التزم بتصميم وتخطيط جميع الأنشطة والخطوات بالاعتماد فقط وحصرياً على الموارد المتاحة المحددة في الفصل.
-4. يجب توليد مخطط Mermaid.js صحيح برمجياً ويدعم النصوص العربية أو الانجليزية داخل العقد (Nodes) لعرض تدفق الدرس.
-5. استخرج كلمة مفتاحية واحدة باللغة الإنجليزية للبحث عن صورة غلاف معبرة عن الموضوع.
+3. التزم بتصميم الأنشطة والخطوات بالاعتماد فقط على الموارد المتاحة.
+4. يجب توليد مخطط Mermaid.js من نوع خريطة ذهنية (mindmap) صحيح برمجياً يوضح العناصر الأساسية والمفاهيم الخاصة بموضوع الدرس. استخدم المسافات البادئة (Indentation) الصحيحة لدعم شجرة الخريطة الذهنية، وادعم النصوص العربية.
+5. استخرج وصف دقيق وتفصيلي باللغة الإنجليزية (Prompt) لتوليد صورة ذكاء اصطناعي تعليمية تشرح وتجسد موضوع الدرس بوضوح.
 
 سياق الاستراتيجيات المسترجعة:
 ${contextText}
@@ -95,4 +95,5 @@ ${contextText}
     return NextResponse.json({ error: e.message || "Something went wrong" }, { status: 500 });
   }
 }
+
 
