@@ -24,10 +24,26 @@ export function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
     const renderChart = async () => {
       if (!chart || !containerRef.current) return;
+      
+      // Clean up markdown code blocks if the LLM includes them
+      let cleanChart = chart.trim();
+      if (cleanChart.startsWith("```mermaid")) {
+        cleanChart = cleanChart.replace("```mermaid", "");
+      } else if (cleanChart.startsWith("```")) {
+        cleanChart = cleanChart.replace(/^```/, "");
+      }
+      if (cleanChart.endsWith("```")) {
+        cleanChart = cleanChart.replace(/```$/, "");
+      }
+      cleanChart = cleanChart.trim();
+
+      if (!cleanChart) return;
+
       try {
         setError(null);
         const id = `mermaid-svg-${Math.round(Math.random() * 1000000)}`;
-        const { svg } = await mermaid.render(id, chart);
+        // Attempt to render
+        const { svg } = await mermaid.render(id, cleanChart);
         if (isMounted) {
           setSvgContent(svg);
         }
