@@ -25,32 +25,42 @@ export function MermaidDiagram({ chart }: MermaidDiagramProps) {
     const renderChart = async () => {
       if (!chart || !containerRef.current) return;
       
-      // Clean up markdown code blocks if the LLM includes them
+      // Sanitize chart code
       let cleanChart = chart.trim();
-      if (cleanChart.startsWith("```mermaid")) {
-        cleanChart = cleanChart.replace("```mermaid", "");
-      } else if (cleanChart.startsWith("```")) {
-        cleanChart = cleanChart.replace(/^```/, "");
-      }
-      if (cleanChart.endsWith("```")) {
-        cleanChart = cleanChart.replace(/```$/, "");
-      }
+      cleanChart = cleanChart.replace(/```mermaid/g, "");
+      cleanChart = cleanChart.replace(/```/g, "");
+      cleanChart = cleanChart.replace(/\t/g, "  "); // replace tabs with spaces
       cleanChart = cleanChart.trim();
 
       if (!cleanChart) return;
 
       try {
         setError(null);
-        const id = `mermaid-svg-${Math.round(Math.random() * 1000000)}`;
-        // Attempt to render
-        const { svg } = await mermaid.render(id, cleanChart);
+        
+        // Timeout wrapper to prevent hanging forever
+        const renderPromise = async () => {
+          // In Mermaid v10+, it's safer to check parse first
+          if (await mermaid.parse(cleanChart)) {
+            const id = `mermaid-svg-${Math.round(Math.random() * 1000000)}`;
+            const { svg } = await mermaid.render(id, cleanChart);
+            return svg;
+          }
+          throw new Error("Parse failed");
+        };
+
+        const timeoutPromise = new Promise<string>((_, reject) => 
+          setTimeout(() => reject(new Error("Mermaid render timed out")), 5000)
+        );
+
+        const svg = await Promise.race([renderPromise(), timeoutPromise]);
+
         if (isMounted) {
           setSvgContent(svg);
         }
       } catch (err: any) {
         if (isMounted) {
           console.error("Mermaid Render Error:", err);
-          setError("لم نتمكن من رسم المخطط البياني. قد يكون هناك خطأ في صياغة الكود.");
+          setError(`خطأ في رسم الخريطة: ${err.message || 'صياغة غير صالحة'}`);
         }
       }
     };
