@@ -6,6 +6,8 @@ import * as React from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
+import { Logo } from "@/components/logo";
+
 const links = [
   { href: "/", label: "الرئيسية" },
   { href: "/planner", label: "مخطط الدروس" },
@@ -40,9 +42,10 @@ export function SiteNav() {
           <nav className="flex items-center justify-between gap-3">
             <Link
               href="/"
-              className="font-heading text-sm sm:text-base font-extrabold tracking-tight text-soul-fg dark:text-white/95"
+              className="flex items-center gap-2 font-heading text-sm sm:text-base font-extrabold tracking-tight text-soul-fg dark:text-white/95 group"
             >
-              بوصلة
+              <Logo className="w-8 h-8 transition-transform duration-300 group-hover:rotate-12" />
+              <span>بوصلة</span>
             </Link>
 
             <div className="hidden sm:flex items-center gap-1">

@@ -25,9 +25,9 @@ export const metadata: Metadata = {
   title: "بوصلة",
   description: "منصة بوصلة التعليمية لبناء خطط الدرس الذكية بالاعتماد على أفضل استراتيجيات التدريس الحديثة.",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=2",
+    apple: "/favicon.ico?v=2",
   },
 };
 
