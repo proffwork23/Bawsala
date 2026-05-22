@@ -204,13 +204,13 @@ export function LessonPlannerClient() {
                   </div>
                   <div className="text-xs font-semibold text-machine-cobalt dark:text-machine-ink flex items-center gap-1 mt-1">
                     <Clock className="w-3 h-3" />
-                    {step.durationInMinutes || "?"} د
+                    {step?.durationInMinutes || "?"} د
                   </div>
                 </div>
                 <div className="space-y-1.5 pt-1">
-                  <h4 className="font-bold text-soul-fg dark:text-white text-base">{step.title}</h4>
+                  <h4 className="font-bold text-soul-fg dark:text-white text-base">{step?.title || "..."}</h4>
                   <p className="text-sm text-soul-fg/80 dark:text-white/80 leading-relaxed">
-                    {step.description}
+                    {step?.description || "..."}
                   </p>
                 </div>
               </div>
