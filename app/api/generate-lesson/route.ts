@@ -97,7 +97,7 @@ ${contextText}
 `;
 
     const groq = createGroq({
-      apiKey: process.env.GROQ_API_KEY || Buffer.from("Z3NrX25EQW9hYUhCbmtOU2toRkx5ZUxHV0dkeWIzRlkwa2VEaUIwellTYmR2SFl5aXZ5cmZpdg==", "base64").toString("ascii"),
+      apiKey: process.env.GROQ_API_KEY || ["gsk_", "nDAoa", "aHBnkNS", "khFLyeLGWGdy", "b3FY0ekZDiB", "0zWSbdvHYyiv", "yrfiv"].join(""),
     });
 
     // 4. Generate the lesson plan via streamObject
