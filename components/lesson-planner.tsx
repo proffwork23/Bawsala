@@ -12,7 +12,7 @@ import { MermaidDiagram } from "@/components/mermaid-diagram";
 
 // Same schema as the backend
 const lessonSchema = z.object({
-  imageGenerationPrompt: z.string(),
+  coverImageKeyword: z.string(),
   lessonHook: z.string(),
   classroomManagement: z.string(),
   mermaidDiagramCode: z.string(),
@@ -67,37 +67,39 @@ export function LessonPlannerClient() {
     return () => clearInterval(interval);
   }, [view]);
 
-  // Preload Image during streaming
+  // Fetch Image during streaming
   useEffect(() => {
-    if (object?.imageGenerationPrompt && !coverImageUrl && !isImageLoading && !isImageDone) {
+    if (object?.coverImageKeyword && !coverImageUrl && !isImageLoading && !isImageDone) {
       setIsImageLoading(true);
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(object.imageGenerationPrompt)}?width=1280&height=720&nologo=true`;
-      
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        setCoverImageUrl(url);
-        setIsImageLoading(false);
-        setIsImageDone(true);
-      };
-      img.onerror = () => {
-        // Fallback image in case Pollinations fails
-        setCoverImageUrl("https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
-        setIsImageLoading(false);
-        setIsImageDone(true);
-      };
+      fetch(`/api/pexels?keyword=${encodeURIComponent(object.coverImageKeyword)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.url) {
+            setCoverImageUrl(data.url);
+          } else {
+             setCoverImageUrl("https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+          }
+          setIsImageLoading(false);
+          setIsImageDone(true);
+        })
+        .catch(err => {
+          console.error(err);
+          setCoverImageUrl("https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+          setIsImageLoading(false);
+          setIsImageDone(true);
+        });
     }
-  }, [object?.imageGenerationPrompt, coverImageUrl, isImageLoading, isImageDone]);
+  }, [object?.coverImageKeyword, coverImageUrl, isImageLoading, isImageDone]);
 
   // Transition to dashboard when everything is fully loaded
   useEffect(() => {
     if (view === "loading" && !isLoading) {
       // If LLM finished, check if image is also done OR it never started (e.g. error in prompt)
-      if (isImageDone || (!object?.imageGenerationPrompt && !isImageLoading)) {
+      if (isImageDone || (!object?.coverImageKeyword && !isImageLoading)) {
         setView("dashboard");
       }
     }
-  }, [view, isLoading, isImageDone, isImageLoading, object?.imageGenerationPrompt]);
+  }, [view, isLoading, isImageDone, isImageLoading, object?.coverImageKeyword]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,9 +127,9 @@ export function LessonPlannerClient() {
 
   if (view === "loading") {
     let loadingMessage = "جاري إعداد وتحليل معطيات الدرس...";
-    if (object?.imageGenerationPrompt && isImageLoading) loadingMessage = "جاري توليد صورة مخصصة بالذكاء الاصطناعي...";
+    if (object?.coverImageKeyword && isImageLoading) loadingMessage = "جاري البحث عن صورة تناسب الموضوع...";
     else if (object?.interactiveSteps) loadingMessage = "جاري كتابة السيناريو التفصيلي للأنشطة...";
-    else if (object?.mermaidDiagramCode) loadingMessage = "جاري رسم وتصميم الخريطة الذهنية...";
+    else if (object?.mermaidDiagramCode) loadingMessage = "جاري رسم المخطط البصري...";
     else if (object?.classroomManagement) loadingMessage = "جاري توزيع وإدارة الفصل...";
     else if (object?.lessonHook) loadingMessage = "جاري صياغة تمهيد جذاب...";
     
@@ -155,7 +157,7 @@ export function LessonPlannerClient() {
             {object?.lessonHook ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Loader2 className="w-4 h-4 animate-spin text-soul-fg/30 dark:text-white/30" />}
           </div>
           <div className="flex items-center justify-between">
-            <span className={`text-sm ${object?.mermaidDiagramCode ? 'text-soul-fg dark:text-white font-semibold' : 'text-soul-fg/50 dark:text-white/50'}`}>الخريطة الذهنية</span>
+            <span className={`text-sm ${object?.mermaidDiagramCode ? 'text-soul-fg dark:text-white font-semibold' : 'text-soul-fg/50 dark:text-white/50'}`}>المخطط البصري</span>
             {object?.mermaidDiagramCode ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Loader2 className="w-4 h-4 animate-spin text-soul-fg/30 dark:text-white/30" />}
           </div>
           <div className="flex items-center justify-between">
@@ -245,7 +247,7 @@ export function LessonPlannerClient() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-indigo-500">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
-            الخريطة الذهنية للدرس
+            التدفق البصري للدرس
           </h3>
           {object?.mermaidDiagramCode ? (
             <MermaidDiagram chart={object.mermaidDiagramCode} />

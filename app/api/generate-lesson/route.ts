@@ -8,10 +8,10 @@ export const maxDuration = 60;
 
 // Strict JSON Schema for the LLM output
 const lessonSchema = z.object({
-  imageGenerationPrompt: z.string().describe("A highly detailed English prompt to generate an educational AI image explaining the topic (e.g., 'A highly detailed 3D illustration of the solar system showing planets orbiting the sun, educational, vivid colors')"),
+  coverImageKeyword: z.string().describe("1 or 2 literal English words for image search"),
   lessonHook: z.string().describe("A short, engaging opening to grab students' attention"),
   classroomManagement: z.string().describe("Specific instructions on how to group students based on the provided 'studentsCount'"),
-  mermaidDiagramCode: z.string().describe("Valid Mermaid.js 'mindmap' code (starting with mindmap\\n) showing the core concepts and elements of the topic"),
+  mermaidDiagramCode: z.string().describe("Valid Mermaid.js flowchart code starting with graph TD;"),
   interactiveSteps: z.array(z.object({
     title: z.string().describe("Step title"),
     description: z.string().describe("Detailed explanation of what the teacher and students will do"),
@@ -67,18 +67,29 @@ export async function POST(req: Request) {
 معيار النجاح: ${s.success_criteria}
 `).join("\n---\n");
 
-    // 3. System Prompt setup (Zero-Shot RAG)
-    const systemPrompt = `أنت "بوصلة"، خبير تصميم تعليمي محترف، مهمتك كتابة خطة درس تطبيقية للمعلم بناءً على المدخلات المقدمة واستراتيجيات التدريس المسترجعة من قاعدة البيانات فقط.
+    const SYSTEM_PROMPT = `أنت خبير تربوي متقدم في تصميم خطط الدروس التفاعلية بناءً على استراتيجيات التدريس الحديثة.
 
-القيود والشروط الهامة:
+تعليمات صارمة (STRICT RULES):
 1. لا تقم بتأليف استراتيجيات غير موجودة في السياق المرفق.
 2. التزم بتخصيص الخطة لتناسب المرحلة الدراسية وعدد الطلاب المذكور بدقة.
 3. التزم بتصميم الأنشطة والخطوات بالاعتماد فقط على الموارد المتاحة.
-4. يجب توليد كود Mermaid.js من نوع خريطة ذهنية (mindmap) صحيح برمجياً يوضح العناصر الأساسية للموضوع. 
-   - لا تضع الكود داخل علامات markdown (مثل \`\`\`mermaid)، بل اكتب الكود مباشرة.
-   - استخدم المسافات البادئة (Indentation) الصحيحة.
-   - لا تستخدم الأقواس الدائرية () في العقد، استخدم الأقواس المربعة [] أو علامات التنصيص المزدوجة "" مع النصوص العربية لتفادي أخطاء الرسم.
-5. استخرج وصف دقيق وتفصيلي باللغة الإنجليزية (Prompt) لتوليد صورة ذكاء اصطناعي تعليمية تشرح وتجسد موضوع الدرس بوضوح.
+
+4. قواعد صارمة لمخطط mermaidDiagramCode:
+   - You MUST generate a valid Mermaid.js flowchart.
+   - Use a top-down flowchart starting with: graph TD;
+   - CRITICAL SYNTAX RULE: Do NOT use parentheses (), brackets [], braces {}, or quotes "" inside the node text. These will crash the Mermaid parser.
+   - Keep node text very brief.
+   - Valid Format Example:
+     graph TD;
+     A[بداية الدرس] --> B[تقسيم المجموعات];
+     B --> C[العمل الجماعي];
+     C --> D[التقييم];
+
+5. قواعد صارمة للكلمة المفتاحية coverImageKeyword:
+   - You MUST output exactly 1 or 2 English words.
+   - The words MUST be literal, physical, and directly represent the academic topic. 
+   - ABSOLUTELY NO metaphors, animals, or abstract concepts. 
+   - Example: If the topic is "Programming", use "Computer" or "Keyboard". DO NOT use "Lion" or "Brain".
 
 سياق الاستراتيجيات المسترجعة:
 ${contextText}
@@ -87,7 +98,7 @@ ${contextText}
     // 4. Generate the lesson plan via streamObject
     const result = streamObject({
       model: google("gemini-2.5-flash"),
-      system: systemPrompt,
+      system: SYSTEM_PROMPT,
       schema: lessonSchema,
       prompt: `المادة: ${subject}\nموضوع الدرس: ${topic}\nالمرحلة الدراسية: ${stage}\nعدد الطلاب: ${studentsCount}\nالموارد المتاحة: ${resources.join(", ") || "لا توجد موارد خاصة"}\n\nرجاءً قم بكتابة خطة الدرس التطبيقية استناداً إلى الشروط والسياق.`,
     });
