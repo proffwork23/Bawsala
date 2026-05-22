@@ -470,9 +470,8 @@ export function LessonPlannerClient() {
     <div className="mx-auto w-full max-w-4xl px-4 py-8 space-y-8" dir="rtl">
       <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-heading font-extrabold flex items-center justify-center gap-3">
-            <Logo className="w-12 h-12" />
-            بوصلة
+          <h1 className="text-3xl font-heading font-extrabold text-soul-fg dark:text-white">
+            درس جديد
           </h1>
           <p className="text-soul-fg/80 dark:text-white/80 text-sm sm:text-base">
             أدخل معطيات درسك وسيقوم النظام ببناء خطة تفصيلية بالاعتماد على أفضل استراتيجيات التدريس.
